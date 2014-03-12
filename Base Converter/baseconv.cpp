@@ -16,12 +16,45 @@ namespace bsc
 		return (unsigned int)num;
 	}
 
-	std::string BaseConverter::convertToBase(double source, unsigned int targetBase, unsigned int fractionBits)
+	char BaseConverter::getNumberChar(unsigned int num)
 	{
-		if (targetBase == 0 || source == 0.0)
+		if (num >= 0 && num <= 9)
+		{
+			return num + '0';
+		}
+		else if (num >= 10 && num <= 15)
+		{
+			return 'A' + (num - 10);
+		}
+		else return 'X';
+	}
+
+	unsigned int BaseConverter::getNumberDigit(char num)
+	{
+		unsigned int digit;
+
+		num = tolower(num);
+
+		if (num >= '0' && num <= '9')
+		{
+			digit = num - '0';
+		}
+		else if (num >= 'a' && num <= 'z')
+		{
+			digit = (num - 'a') + 10;
+		}
+
+		return digit;
+	}
+
+	std::string BaseConverter::convertToBase(std::string input, unsigned int sourceBase, unsigned int targetBase, unsigned int fractionBits)
+	{
+		if (targetBase == 0 || sourceBase == 0)
 		{
 			throw std::exception();
 		}
+
+		double source = BaseConverter::convertFromBase(input, sourceBase);
 
 		std::stringstream output;
 		std::string num;
@@ -33,7 +66,7 @@ namespace bsc
 			unsigned int remainder = integer % targetBase;
 			integer /= targetBase;
 
-			num.push_back(remainder + '0');
+			num.push_back(BaseConverter::getNumberChar(remainder));
 		}
 
 		for (int i = num.size() - 1; i >= 0; --i)
@@ -62,7 +95,7 @@ namespace bsc
 				hasFraction = true;
 			}
 
-			num.push_back(remainder + '0');
+			num.push_back(BaseConverter::getNumberChar(remainder));
 		}
 
 		for (size_t i = 0; i < num.size(); ++i)
@@ -80,7 +113,7 @@ namespace bsc
 		return result;
 	}
 
-	double BaseConverter::convertFromBase(std::string input, unsigned int baseFrom)
+	double BaseConverter::convertFromBase(std::string input, unsigned int sourceBase)
 	{
 		double result = 0.0;
 
@@ -94,37 +127,19 @@ namespace bsc
 		// integer part
 		for (size_t i = 0; i < position; ++i)
 		{
-			char token = tolower(input[i]);
-			unsigned int digit;
+			char token = input[i];
+			unsigned int digit = BaseConverter::getNumberDigit(token);
 
-			if (isdigit(token))
-			{
-				digit = token - '0';
-			}
-			else if (isalpha(token) && token >= 'a' && token <= 'z')
-			{
-				digit = (token - 'a') + 10;
-			}
-
-			result += digit * pow(baseFrom, position - i - 1);
+			result += digit * pow(sourceBase, position - i - 1);
 		}
 
 		// fractional part
 		for (size_t i = position + 1; i < input.size(); ++i)
 		{
-			char token = tolower(input[i]);
-			unsigned int digit;
+			char token = input[i];
+			unsigned int digit = BaseConverter::getNumberDigit(token);
 
-			if (isdigit(token))
-			{
-				digit = token - '0';
-			}
-			else if (isalpha(token) && token >= 'a' && token <= 'z')
-			{
-				digit = (token - 'a') + 10;
-			}
-
-			result += digit * (1.0 / pow(baseFrom, i - position));
+			result += digit * (1.0 / pow(sourceBase, i - position));
 		}
 
 		return result;

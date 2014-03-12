@@ -13,10 +13,13 @@ namespace bsc
 	private:
 		static double getFraction(double num);
 		static unsigned int getInteger(double num);
+		static char getNumberChar(unsigned int num);
+		static unsigned int getNumberDigit(char num);
+
+		static double convertFromBase(std::string input, unsigned int sourceBase);
 
 	public:
-		static std::string convertToBase(double source, unsigned int targetBase, unsigned int fractionBits = 8);
-		static double convertFromBase(std::string input, unsigned int baseFrom);
+		static std::string convertToBase(std::string input, unsigned int sourceBase, unsigned int targetBase, unsigned int fractionBits = 8);
 	};
 }
 
